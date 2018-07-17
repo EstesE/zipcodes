@@ -1,0 +1,11 @@
+{
+    "application": {
+        "name": "zipcodes"
+    },
+    "url": "https://tools.usps.com/tools/app/ziplookup/cityByZip",
+    "timeout": 30000,
+    "data": {
+        "save": true,
+        "connection": "mongodb://localhost:27017/zipcodes"
+    }
+}

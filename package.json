@@ -1,0 +1,16 @@
+{
+  "name": "zipcodes",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {},
+  "dependencies": {
+    "async": "^2.6.1",
+    "chalk": "^2.4.1",
+    "config": "^1.30.0",
+    "form-data": "^2.3.2",
+    "mongoose": "^5.2.1",
+    "node-fetch": "^2.1.2",
+    "node-notifier": "^5.2.1",
+    "ora": "^2.1.0"
+  }
+}
