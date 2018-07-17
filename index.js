@@ -28,7 +28,7 @@ mongoose.connect(config.data.connection, { useNewUrlParser: true }, err => {
   // console.log('connected')
 });
 
-let getPermutations = function (queueWorkload, fetchData, processResults) {
+let getPermutations = function (generateFile, queueWorkload, fetchData, processResults) {
   let spinner = ora('Generating permutations...').start();
   for (let a = 0; a <= 9; a++) {
     for (let b = 0; b <= 9; b++) {
@@ -57,14 +57,16 @@ let getPermutations = function (queueWorkload, fetchData, processResults) {
               }
 
               // Shuffle array???
-              shuffle(zipCodes);
+              if (config.shuffle === true) {
+                shuffle(zipCodes);
+              }
 
               setTimeout(() => {
                 // Modify the array for testing.
                 zipCodes.splice(0, 600); // Remove first 600 useless permutations.
-                // zipCodes.splice(3, zipCodes.length); // temp
+                // zipCodes.splice(3, zipCodes.length); // temp: make array smaller for testing
                 spinner.succeed();
-                queueWorkload(zipCodes, fetchData, processResults);
+                generateFile(zipCodes, fetchData, processResults);
               }, 2000);
             }
           }
@@ -74,24 +76,58 @@ let getPermutations = function (queueWorkload, fetchData, processResults) {
   }
 };
 
-let queueWorkload = function (zipCodes, fetchData, processResults) {
-  const async = require('async');
+let generateFile = function (zipCodes, fetchData, processResults) {
+  const fs = require('fs');
+  let fileContent = fs.readFileSync('zipcodes.json');
+  let content = JSON.parse(fileContent);
+  if (content.zipcodes.length === 0) {
+    let stream = fs.createWriteStream("zipcodes.json");
+    let zips = '"' + zipCodes.join('","') + '"';
 
-  let q = async.queue(function (task, callback) {
-    fetchData(task, processResults, callback);
-    // callback();
-  }, 1);
-
-  q.drain = function () {
-    console.log('\nFinished processing queue.\n');
-    mongoose.connection.close();
-    // Finish
+    stream.write(`{ "zipcodes": [${zips}] }`);
+    stream.end(() => {
+      queueWorkload(zipCodes, fetchData, processResults);
+    });
+  } else {
+    queueWorkload(content.zipcodes, fetchData, processResults);
   }
+};
 
-  q.push(zipCodes, function (err) {
-    if (err) {
-      console.log(`Error: ${err}`);
-    }
+let queueWorkload = (zipCodes, fetchData, processResults) => {
+  const async = require('async');
+  const fs = require('fs');
+  let fileContent = fs.readFileSync('zipcodes.json');
+  let content = JSON.parse(fileContent);
+
+  async.eachSeries(content.zipcodes, function (zip, callback) {
+    setTimeout(function () {
+      let spinner = ora(`Fetching data for ${zip}`).start();
+      const form = new FormData();
+      form.append('zip', zip);
+      fetch(config.url, { method: 'POST', body: form })
+        .then((res) => {
+          return res.json();
+        })
+        .then((json) => {
+          spinner.succeed();
+          const fs = require('fs');
+          let fileContent = fs.readFileSync('zipcodes.json');
+          let content = JSON.parse(fileContent);
+          content.zipcodes.shift();
+          let stream = fs.createWriteStream("zipcodes.json");
+          let zips = '"' + content.zipcodes.join('","') + '"';
+
+          stream.write(`{ "zipcodes": [${zips}] }`);
+          stream.end(() => {
+            processResults({ zip: zip, results: json }, callback);
+          });
+        })
+        .catch((err) => {
+          if (err) {
+            spinner.fail(`Error: ${err.message}`);
+          }
+        });
+    }, config.timeout);
   });
 };
 
@@ -134,7 +170,6 @@ let processResults = (results, callback) => {
 
     let query = { zip5: z.zip5 };
     ZipCode.findOneAndUpdate(query, { $set: { zip5: zip.zip5, defaultCity: zip.defaultCity, defaultState: zip.defaultState, defaultRecordType: zip.defaultRecordType, lastUpdated: zip.lastUpdated, citiesList: zip.citiesList, nonAcceptList: zip.nonAcceptList } }, { upsert: true, new: true }, function (err, doc) {
-      debugger;
       callback();
     });
 
@@ -145,4 +180,4 @@ let processResults = (results, callback) => {
 };
 
 console.log('\n');
-getPermutations(queueWorkload, fetchData, processResults);
+getPermutations(generateFile, queueWorkload, fetchData, processResults);

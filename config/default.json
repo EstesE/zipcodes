@@ -3,7 +3,8 @@
         "name": "zipcodes"
     },
     "url": "https://tools.usps.com/tools/app/ziplookup/cityByZip",
-    "timeout": 30000,
+    "timeout": 3000,
+    "shuffle": false,
     "data": {
         "save": true,
         "connection": "mongodb://localhost:27017/zipcodes"
