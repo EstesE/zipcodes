@@ -129,7 +129,7 @@ let queueWorkload = (zipCodes, fetchData, processResults) => {
             select: `${zipResults.defaultCity}+${zipResults.defaultState}+${zipResults.zip5}`
           };
           let hasCoor = false;
-          let geoResults = await fetch(config.geocoding.baseApiURL + options.select + '&key=' + config.geocoding.key).then(response => {
+          let geoResults = await fetch(config.geocoding.baseApiURL + options.select).then(response => {
             hasCoor = true;
             return response.json();
           }).catch((err) => {

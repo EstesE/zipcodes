@@ -10,8 +10,7 @@
         "connection": "mongodb://localhost:27017/zipcodes"
     },
     "geocoding": {
-        "baseApiURL": "https://maps.googleapis.com/maps/api/geocode/json?address=",
-        "key": ""
+        "baseApiURL": "https://maps.googleapis.com/maps/api/geocode/json?address="
     },
     "elevation": {
         "baseApiURL": "https://maps.googleapis.com/maps/api/elevation/json?locations="
