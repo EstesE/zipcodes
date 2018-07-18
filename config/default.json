@@ -4,9 +4,19 @@
     },
     "url": "https://tools.usps.com/tools/app/ziplookup/cityByZip",
     "timeout": 3000,
-    "shuffle": false,
+    "shuffle": true,
     "data": {
         "save": true,
         "connection": "mongodb://localhost:27017/zipcodes"
+    },
+    "geocoding": {
+        "baseApiURL": "https://maps.googleapis.com/maps/api/geocode/json?address=",
+        "key": ""
+    },
+    "elevation": {
+        "baseApiURL": "https://maps.googleapis.com/maps/api/elevation/json?locations="
+    },
+    "timezone": {
+        "baseApiURL": "https://maps.googleapis.com/maps/api/timezone/json?location="
     }
 }
