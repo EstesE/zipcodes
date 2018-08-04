@@ -3,7 +3,7 @@
         "name": "zipcodes"
     },
     "url": "https://tools.usps.com/tools/app/ziplookup/cityByZip",
-    "timeout": 3000,
+    "timeout": 600,
     "shuffle": true,
     "data": {
         "save": true,
